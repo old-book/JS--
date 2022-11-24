@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Number guessing game</title>
+    <!--style：画面のレイアウト調整-->
+    <style>
+      html {
+        font-family: sans-serif;
+      }
+
+      body {
+        width: 50%;
+        max-width: 800px;
+        min-width: 480px;
+        margin: 0 auto;
+      }
+      
+      .form input[type="number"] {
+        width: 200px;
+      }
+
+      .lastResult {
+        color: white;
+        padding: 3px;
+      }
+    </style>
+  </head>
+  <!--body：内装-->
+  <body>
+    <!--h1：見出し-->
+    <h1>Number guessing game</h1>
+    <!--p：強調-->
+    <p>We have selected a random number between 1 and 100. See if you can guess it in 10 turns or fewer. We'll tell you if your guess was too high or too low.</p>
+    <!--div:コンテンツ区分要素-->
+        <!--class="form"：ウェブサーバーに情報を送信するための対話型コントロールを含む文書の区間-->
+    <div class="form">
+      <label for="guessField">Enter a guess: </label>
+        　<!--class="guessField"：クラス『入力フォーム：推測値』-->
+      <input type="number" min="1" max="100" required id="guessField" class="guessField">
+        　<!--class="guessSubmit"：クラス『送信フォーム：推測値』-->
+      <input type="submit" value="Submit guess" class="guessSubmit">
+    </div>
+    <!--div:コンテンツ区分要素-->
+        <!--class="resultParas"：結果を落下傘形式で出力-->
+    <div class="resultParas">
+        　<!--class="guess"：クラス『推測値』-->
+      <p class="guesses"></p>
+        　<!--class="LastResult"：クラス『判定結果』-->
+      <p class="lastResult"></p>
+        　<!--class="LowOrHi"：クラス『判定内容』-->
+      <p class="lowOrHi"></p>
+    </div>
+
+
+    <!--script:JSコード部分-->
+    <script>
+        /**
+                    const	let	var
+        再宣言          ×	×	○
+        再代入	        ×	○	○
+        スコープ	   ブロック	ブロック 関数
+        ホイスティング	エラー	エラー	undefined
+        **/
+       //let:ブロック範囲での変数 
+      let randomNumber = Math.floor(Math.random() * 100) + 1;
+      //document.querySelector:指定されたセレクターまたはセレクター群に一致する、文書内の最初の Element を返します。
+      //const:ブロック範囲での定数
+      const guesses = document.querySelector('.guesses');
+      const lastResult = document.querySelector('.lastResult');
+      const lowOrHi = document.querySelector('.lowOrHi');
+      const guessSubmit = document.querySelector('.guessSubmit');
+      const guessField = document.querySelector('.guessField');
+      let guessCount = 1;
+      let resetButton;
+        //function:関数
+            //checkGuess():推測値の確認
+            /**
+                ・試行回数確認
+                ・推測値と乱数（正当値）の判定
+                    ・正しい場合は緑色の背景色
+                    ・間違えた場合は赤色の背景色、正当値の高低を出力
+            **/
+      function checkGuess() {
+        const userGuess = Number(guessField.value);
+        if (guessCount === 1) {
+          guesses.textContent = 'Previous guesses: ';
+        }
+
+        guesses.textContent += userGuess + ' ';
+
+        if (userGuess === randomNumber) {
+          lastResult.textContent = 'Congratulations! You got it right!';
+          lastResult.style.backgroundColor = 'green';
+          lowOrHi.textContent = '';
+          setGameOver();
+        } else if (guessCount === 10) {
+          lastResult.textContent = '!!!GAME OVER!!!';
+          lowOrHi.textContent = '';
+          setGameOver();
+        } else {
+          lastResult.textContent = 'Wrong!';
+          lastResult.style.backgroundColor = 'red';
+          if(userGuess < randomNumber) {
+            lowOrHi.textContent = 'Last guess was too low!' ;
+          } else if(userGuess > randomNumber) {
+            lowOrHi.textContent = 'Last guess was too high!';
+          }
+        }
+            /**
+                ・試行回数の追加
+                ・入力フォームの初期化
+            **/
+        guessCount++;
+        guessField.value = '';
+            //フォーカスを入力フォームにセット
+        guessField.focus();
+      }
+      //送信ボタン押下時のイベント処理　⇒　[checkGuess]
+      guessSubmit.addEventListener('click', checkGuess);
+        //function:関数
+            //setGameOver():ゲーム終了時の処理
+            /**
+                ・入力、出力フォームの非表示
+                ・推測値と乱数（正当値）の判定
+                    ・正しい場合は緑色の背景色
+                    ・間違えた場合は赤色の背景色、正当値の高低を出力
+            **/
+      function setGameOver() {
+        guessField.disabled = true;
+        guessSubmit.disabled = true;
+        //document.createElement:要素を作成
+        resetButton = document.createElement('button');
+        resetButton.textContent = 'Start new game';
+        //document.body.appendChild:HTMLのBody要素に要素resetButtonを追加
+        document.body.appendChild(resetButton);
+        //resetButton押下時のイベント処理　⇒　[resetGame]
+        resetButton.addEventListener('click', resetGame);
+      }
+        //function:関数
+            //resetGame():ゲームリセットの処理
+            /**
+                ・出力結果の初期化
+                ・入出力フォームの再表示
+                ・入力フォームの初期化
+                ・正当値の再設定
+            **/
+      function resetGame() {
+        guessCount = 1;
+        //document.querySelectorAll:
+        //与えられた CSS セレクターに一致する文書中の要素のリストを示す静的なNodeListを返却
+        const resetParas = document.querySelectorAll('.resultParas p');
+        for (const resetPara of resetParas) {
+          resetPara.textContent = '';
+        }
+        //要素.parentNode.removeChild:自分自身のノードを削除
+        resetButton.parentNode.removeChild(resetButton);
+        guessField.disabled = false;
+        guessSubmit.disabled = false;
+        guessField.value = '';
+        guessField.focus();
+        lastResult.style.backgroundColor = 'white';
+        randomNumber = Math.floor(Math.random() * 100) + 1;
+      }
+    </script>
+  </body>
+</html>
